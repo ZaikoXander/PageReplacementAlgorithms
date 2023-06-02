@@ -1,0 +1,24 @@
+{
+  "name": "page-replacement-algorithms",
+  "version": "0.0.0",
+  "main": "dist/index.js",
+  "author": {
+    "name": "ZaikoXander",
+    "email": "alexdaniel.lima28@gmail.com",
+    "url": "https://github.com/ZaikoXander"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.14.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prod": "node ./dist/index.js",
+    "dev": "ts-node ./src/index"
+  },
+  "devDependencies": {
+    "@types/node": "^20.2.5",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.3"
+  }
+}
