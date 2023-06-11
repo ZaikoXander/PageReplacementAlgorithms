@@ -11,7 +11,7 @@ class FIFO {
     this.pageReplacementIndex = 0
   }
 
-  addPageToMemory(page: Page): void {
+  public addPageToMemory(page: Page): void {
     if (this._memory.includes(page) ) {
       console.error(`ERROR: This page with id \`${page.id}\` was already added.`)
       return

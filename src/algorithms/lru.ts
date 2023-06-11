@@ -15,7 +15,7 @@ class LRU {
   private time: number
 
   constructor(memorySize: number) {
-    this._memory = new Array<LRUPage>
+    this._memory = new Array<LRUPage>()
     this.memorySize = memorySize
     this.time = 0
   }
