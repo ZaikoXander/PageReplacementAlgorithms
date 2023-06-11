@@ -6,7 +6,7 @@ This project aims to implement various page replacement algorithms. Below is a l
 - [x] NRU
 - [ ] Second-Chance
 - [ ] Clock
-- [ ] MRU
+- [x] MRU 
 ###
 - [x] LRU *
 
