@@ -3,8 +3,8 @@
 This project aims to implement various page replacement algorithms. Below is a list of the algorithms included, along with their completion status:
 
 - [x] FIFO
-- [ ] NUR
-- [ ] SC
+- [x] NRU
+- [ ] Second-Chance
 - [ ] Clock
 - [ ] MRU
 ###
