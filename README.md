@@ -4,8 +4,8 @@ This project aims to implement various page replacement algorithms. Below is a l
 
 - [x] FIFO
 - [x] NRU
-- [ ] Second-Chance
-- [ ] Clock
+- [x] Second-Chance
+- [x] Clock
 - [x] MRU 
 ###
 - [x] LRU *
