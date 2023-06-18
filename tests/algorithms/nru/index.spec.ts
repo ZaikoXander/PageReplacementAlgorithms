@@ -4,13 +4,12 @@ import NRU from "@src/algorithms/nru"
 import NRUPage from "@src/algorithms/nru/nruPage"
 import Page from "@src/page"
 
-//* yarn test:watch ./tests/algorithms/nru.spec.ts
+//* yarn test:watch ./tests/algorithms/nru/index.spec.ts
 
 describe('NRU algorithm expectations', () => {
   it('should be able to create a NRU instance', () => {
     const memorySize = faker.number.int(50)
     const recentUsageTimeThreshold = faker.number.int(20)
-
     const nru = new NRU(memorySize, recentUsageTimeThreshold)
 
     expect(nru).toBeTruthy()
@@ -39,9 +38,8 @@ describe('NRU algorithm expectations', () => {
   
       pageIds.forEach(pageId => nru.addPageToMemory(new Page(pageId)))
   
-      expect(memorySize).toBe(nru.memory.length)
-      expect(memorySize).toBe(pageIds.length)
-      expect(pageIds.length).toBe(nru.memory.length)
+      expect(nru.memory.length).toBe(memorySize)
+      expect(nru.memory.length).toBe(pageIds.length)
       for (let i = 0; i < memorySize; i++) {
         expect(nru.memory[i].id).toBe(pageIds[i])
         expect(nru.memory[i].lastTimeUsed).toBe(i)
@@ -101,7 +99,10 @@ describe('NRU algorithm expectations', () => {
       for (let i = 0; i < memorySize; i++) {
         pageIds.push(faker.string.alpha({
           casing: "upper",
-          exclude: [...memoryPageIds, ...pageIds]
+          exclude: [
+            ...memoryPageIds,
+            ...pageIds
+          ]
         }))
       }
   
@@ -134,16 +135,20 @@ describe('NRU algorithm expectations', () => {
   
       nru.addPageToMemory(new Page(pageIds[3]))
   
-      expect(memorySize).toBe(nru.memory.length)
-      expect(memorySize).toBe(pageIds.length)
-      expect(pageIds.length).toBe(nru.memory.length)
-      expect(memoryBeforeChanges).not.toBe(nru.memory)
+      expect(nru.memory.length).toBe(memorySize)
+      expect(pageIds.length).toBe(memorySize)
+      expect(nru.memory.length).toBe(pageIds.length)
+      expect(nru.memory).not.toBe(memoryBeforeChanges)
       for (let i = 0; i < memorySize; i++) {
-        expect(memoryBeforeChanges[i]).not.toBe(nru.memory[i])
+        expect(nru.memory[i]).not.toBe(memoryBeforeChanges[i])
   
         const nruPageIndex = nru.memory.findIndex(nruPage => nruPage.id === pageIds[i])
         expect(nruPageIndex).not.toBe(-1)
       }
+
+      const nruPagesExpectedModified = [true, true, false, true]
+      const memoryPagesModified = nru.memory.map(({ modified }) => modified)
+      expect(memoryPagesModified).toEqual(nruPagesExpectedModified)
     })
   
     it('should be able to have pages of all categories', () => {
@@ -172,12 +177,8 @@ describe('NRU algorithm expectations', () => {
       nru.modifyPage(pageIds[2])
   
       const nruPagesExpectedProperties = [[22, true], [23, false], [2, true], [3, false]]
-      const memoryPageProperties = nru.memory.map(({ lastTimeUsed, modified }) => ({ lastTimeUsed, modified}))
-      const nruPagesExpectedPropertiesToObjectFormat = nruPagesExpectedProperties.map(([lastTimeUsed, modified]) => ({
-        lastTimeUsed,
-        modified
-      }))
-      expect(memoryPageProperties).toEqual(nruPagesExpectedPropertiesToObjectFormat)
+      const memoryPagesProperties = nru.memory.map(({ lastTimeUsed, modified }) => [lastTimeUsed, modified])
+      expect(memoryPagesProperties).toEqual(nruPagesExpectedProperties)
   
       const memoryBeforeReplacement = nru.memory.map(nruPage => new NRUPage(nruPage.id, nruPage.lastTimeUsed))
   
