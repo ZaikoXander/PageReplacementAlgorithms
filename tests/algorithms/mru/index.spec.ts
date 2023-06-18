@@ -4,12 +4,11 @@ import MRU from "@src/algorithms/mru"
 import MRUPage from "@src/algorithms/mru/mruPage"
 import Page from "@src/page"
 
-//* yarn test:watch ./tests/algorithms/mru.spec.ts
+//* yarn test:watch ./tests/algorithms/mru/index.spec.ts
 
 describe('MRU algorithm expectations', () => {
   it('should be able to create a MRU instance', () => {
     const memorySize = faker.number.int(50)
-
     const mru = new MRU(memorySize)
 
     expect(mru).toBeTruthy()
@@ -75,7 +74,10 @@ describe('MRU algorithm expectations', () => {
       for (let i = 0; i < memorySize; i++) {
         pageIds.push(faker.string.alpha({
           casing: "upper",
-          exclude: [...memoryPageIds, ...pageIds]
+          exclude: [
+            ...memoryPageIds,
+            ...pageIds
+          ]
         }))
       }
 
