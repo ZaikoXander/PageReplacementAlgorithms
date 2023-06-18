@@ -6,8 +6,9 @@ import Page from "@src/page"
 
 describe('Page expectations', () => {
   it('should be able to create a page', () => {
-    const id = faker.string.alpha({ casing: "upper" })
-
+    const id = faker.string.alpha({
+      casing: "upper"
+    })
     const page = new Page(id)
 
     expect(page).toBeTruthy()
@@ -15,8 +16,9 @@ describe('Page expectations', () => {
   })
 
   it('should be able to get page id', () => {
-    const id = faker.string.alpha({ casing: "upper" })
-
+    const id = faker.string.alpha({
+      casing: "upper"
+    })
     const page = new Page(id)
 
     expect(page.id).toBeTruthy()
