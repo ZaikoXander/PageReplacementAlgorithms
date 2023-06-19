@@ -1,13 +1,5 @@
-import Page from "../page"
-
-class LRUPage extends Page {
-  public lastTimeUsed: number
-
-  constructor(id: string, lastTimeUsed: number) {
-    super(id)
-    this.lastTimeUsed = lastTimeUsed
-  }
-}
+import Page from "../../page"
+import LRUPage from "./lruPage"
 
 class LRU {
   private _memory: LRUPage[]
@@ -36,6 +28,7 @@ class LRU {
       this.time++
       return
     }
+
     this._memory.push(new LRUPage(page.id, this.time))
     this.time++
   }
