@@ -1,5 +1,5 @@
 import { Config } from "jest"
-import { pathsToModuleNameMapper } from "ts-jest";
+import { pathsToModuleNameMapper } from "ts-jest"
 import { compilerOptions } from "./tsconfig.json"
 
 const config: Config = {
@@ -12,6 +12,12 @@ const config: Config = {
     prefix: '<rootDir>/',
   }),
   collectCoverageFrom: ['**/*.(t|j)s'],
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    '/coverage/',
+    './jest.config.ts',
+    '/src/index.ts'
+  ],
   coverageDirectory: './coverage',
   testEnvironment: 'node',
 }
