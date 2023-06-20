@@ -1,6 +1,9 @@
 import Page from "../../page"
 import ClockPage from "./clockPage"
 
+import DuplicatePageError from "../../errors/duplicatePageError"
+import PageNotFoundError from "../../errors/pageNotFoundError"
+
 class Clock {
   private memorySize: number
   private _memory: ClockPage[]
@@ -15,10 +18,7 @@ class Clock {
   public addPageToMemory(page: Page): void {
     const isPageAlreadyAdded = this._memory.find(clockPage => clockPage.id === page.id) ? true : false
 
-    if (isPageAlreadyAdded) {
-      console.error(`Error: This page with id \`${page.id}\` was already added.`)
-      return
-    }
+    if (isPageAlreadyAdded) throw new DuplicatePageError(page.id)
 
     if (this._memory.length === this.memorySize) {
       while (true) {
@@ -41,10 +41,7 @@ class Clock {
   public usePage(pageId: string): void {
     const pageIndex = this._memory.findIndex(clockPage => clockPage.id === pageId)
 
-    if (pageIndex === -1) {
-      console.error(`Error: Page with id \`${pageId}\` not found.`)
-      return
-    }
+    if (pageIndex === -1) throw new PageNotFoundError(pageId)
 
     this._memory[pageIndex].used = true
   }

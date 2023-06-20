@@ -1,6 +1,9 @@
 import Page from "../../page"
 import NRUPage from "./nruPage"
 
+import DuplicatePageError from "../../errors/duplicatePageError"
+import PageNotFoundError from "../../errors/pageNotFoundError"
+
 class NRU {
   private memorySize: number
   private recentUsageTimeThreshold: number
@@ -65,10 +68,8 @@ class NRU {
   public addPageToMemory(page: Page): void {
     const isPageAlreadyAdded = this._memory.find(nruPage => nruPage.id === page.id) ? true : false
 
-    if (isPageAlreadyAdded) {
-      console.error(`Error: This page with id \`${page.id}\` was already added.`)
-      return
-    }
+    if (isPageAlreadyAdded) throw new DuplicatePageError(page.id)
+
     if (this._memory.length === this.memorySize) {
       const notUsedRecentlyAndNotModifiedPages = this.findNotUsedRecentlyAndNotModifiedPages()
       if (notUsedRecentlyAndNotModifiedPages.length > 0) {
@@ -122,10 +123,7 @@ class NRU {
   public usePage(pageId: string): void {
     const pageIndex = this.findPageIndexById(pageId)
 
-    if (pageIndex === -1) {
-      console.error(`Error: Page with id \`${pageId}\` not found.`)
-      return
-    }
+    if (pageIndex === -1) throw new PageNotFoundError(pageId)
 
     this._memory[pageIndex].lastTimeUsed = this.time
     this.time++
@@ -134,10 +132,7 @@ class NRU {
   public modifyPage(pageId: string): void {
     const pageIndex = this.findPageIndexById(pageId)
 
-    if (pageIndex === -1) {
-      console.error(`Error: Page with id \`${pageId}\` not found.`)
-      return
-    }
+    if (pageIndex === -1) throw new PageNotFoundError(pageId)
 
     this._memory[pageIndex].modified = true
   }

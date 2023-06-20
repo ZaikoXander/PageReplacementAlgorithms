@@ -1,6 +1,9 @@
 import Page from "../../page"
 import MRUPage from "./mruPage"
 
+import DuplicatePageError from "../../errors/duplicatePageError"
+import PageNotFoundError from "../../errors/pageNotFoundError"
+
 class MRU {
   private _memory: MRUPage[]
   private memorySize: number
@@ -15,10 +18,7 @@ class MRU {
   public addPageToMemory(page: Page): void {
     const isPageAlreadyAdded = this._memory.find(mruPage => mruPage.id === page.id) ? true : false
 
-    if (isPageAlreadyAdded) {
-      console.error(`Error: This page with id \`${page.id}\` was already added.`)
-      return
-    }
+    if (isPageAlreadyAdded) throw new DuplicatePageError(page.id)
     if (this._memory.length === this.memorySize) {
       const highestLastTimeUsed: number = this._memory.reduce((max, current) => Math.max(max, current.lastTimeUsed), this._memory[0].lastTimeUsed)
 
@@ -36,10 +36,7 @@ class MRU {
   public usePage(pageId: string): void {
     const pageIndex = this._memory.findIndex(mruPage => mruPage.id === pageId)
 
-    if (pageIndex === -1) {
-      console.error(`Error: Page with id \`${pageId}\` not found.`)
-      return
-    }
+    if (pageIndex === -1) throw new PageNotFoundError(pageId)
 
     this._memory[pageIndex].lastTimeUsed = this.time
     this.time++

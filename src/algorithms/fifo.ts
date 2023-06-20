@@ -1,5 +1,7 @@
 import Page from "../page"
 
+import DuplicatePageError from "../errors/duplicatePageError"
+
 class FIFO {
   private _memory: Page[]
   private memorySize: number
@@ -12,10 +14,8 @@ class FIFO {
   }
 
   public addPageToMemory(page: Page): void {
-    if (this._memory.includes(page) ) {
-      console.error(`ERROR: This page with id \`${page.id}\` was already added.`)
-      return
-    }
+    if (this._memory.includes(page)) throw new DuplicatePageError(page.id)
+    
     if (this._memory.length === this.memorySize) {
       this._memory[this.pageReplacementIndex] = page
       if (this.pageReplacementIndex === 3) {
