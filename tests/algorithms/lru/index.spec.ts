@@ -4,6 +4,9 @@ import LRU from "@src/algorithms/lru"
 import LRUPage from "@src/algorithms/lru/lruPage"
 import Page from "@src/page"
 
+import DuplicatePageError from "@src/errors/duplicatePageError"
+import PageNotFoundError from "@src/errors/pageNotFoundError"
+
 //* yarn test:watch ./tests/algorithms/lru/index.spec.ts
 
 describe('LRU algorithm expectations', () => {
@@ -44,6 +47,18 @@ describe('LRU algorithm expectations', () => {
       }
     })
 
+    it('should not be able to add pages with identical id', () => {
+      const memoryBeforeChanges = lru.memory
+      const memoryPageIds = memoryBeforeChanges.map(page => page.id)
+
+      const pages: LRUPage[] = memoryPageIds.map((id, index) => new LRUPage(id, index))
+
+      pages.forEach(page => {
+        expect(() => lru.addPageToMemory(page)).toThrow(DuplicatePageError)
+      })
+      expect(lru.memory).toBe(memoryBeforeChanges)
+    })
+
     it('should be able to use a page', () => {
       const memoryBeforeChanges = lru.memory.map(lruPage => new LRUPage(lruPage.id, lruPage.lastTimeUsed))
 
@@ -62,6 +77,19 @@ describe('LRU algorithm expectations', () => {
       expect(lru.memory[1].lastTimeUsed).toBe(5)
       expect(lru.memory[2].lastTimeUsed).toBe(6)
       expect(lru.memory[3].lastTimeUsed).toBe(7)
+    })
+
+    it("should not be able to use a page that isn't in memory", () => {
+      const memoryBeforeChanges = lru.memory
+      const memoryPageIds: string[] = memoryBeforeChanges.map(page => page.id)
+
+      const pageId = faker.string.alpha({
+        casing: "upper",
+        exclude: memoryPageIds
+      })
+
+      expect(() => lru.usePage(pageId)).toThrow(PageNotFoundError)
+      expect(lru.memory).toBe(memoryBeforeChanges)
     })
 
     it('should be able to replace previous pages when memory is full', () => {
