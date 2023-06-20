@@ -30,7 +30,8 @@ describe('NRU Page expectations', () => {
 
   describe('Page lastTimeUsed expectations', () => {
     it('should be able to get page lastTimeUsed', () => {
-      expect(page.lastTimeUsed).toBeTruthy()
+      expect(page.lastTimeUsed).toBeGreaterThanOrEqual(0)
+      expect(page.lastTimeUsed).toBeLessThanOrEqual(30)
       expect(page.lastTimeUsed).toBe(lastTimeUsed)
       expect(typeof page.lastTimeUsed).toBe("number")
     })
