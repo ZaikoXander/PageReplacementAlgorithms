@@ -4,6 +4,9 @@ import Clock from "@src/algorithms/clock"
 import ClockPage from "@src/algorithms/clock/clockPage"
 import Page from "@src/page"
 
+import DuplicatePageError from "@src/errors/duplicatePageError"
+import PageNotFoundError from "@src/errors/pageNotFoundError"
+
 //* yarn test:watch ./tests/algorithms/clock/index.spec.ts
 
 describe('Clock algorithm expectations', () => {
@@ -44,6 +47,18 @@ describe('Clock algorithm expectations', () => {
       }
     })
 
+    it('should not be able to add pages with identical id', () => {
+      const memoryBeforeChanges = clock.memory
+      const memoryPageIds = memoryBeforeChanges.map(page => page.id)
+
+      const pages: ClockPage[] = memoryPageIds.map(id => new ClockPage(id))
+
+      pages.forEach(page => {
+        expect(() => clock.addPageToMemory(page)).toThrow(DuplicatePageError)
+      })
+      expect(clock.memory).toBe(memoryBeforeChanges)
+    })
+
     it('should be able to use a page', () => {
       const memoryBeforeChanges = clock.memory.map(clockPage => new ClockPage(clockPage.id))
 
@@ -62,6 +77,19 @@ describe('Clock algorithm expectations', () => {
       expect(clock.memory[1].used).toBe(true)
       expect(clock.memory[2].used).toBe(true)
       expect(clock.memory[3].used).toBe(true)
+    })
+
+    it("should not be able to use a page that isn't in memory", () => {
+      const memoryBeforeChanges = clock.memory
+      const memoryPageIds: string[] = memoryBeforeChanges.map(page => page.id)
+
+      const pageId = faker.string.alpha({
+        casing: "upper",
+        exclude: memoryPageIds
+      })
+
+      expect(() => clock.usePage(pageId)).toThrow(PageNotFoundError)
+      expect(clock.memory).toBe(memoryBeforeChanges)
     })
 
     it('should be able to replace previous pages when memory is full', () => {
