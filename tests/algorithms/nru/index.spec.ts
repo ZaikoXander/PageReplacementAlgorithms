@@ -4,6 +4,9 @@ import NRU from "@src/algorithms/nru"
 import NRUPage from "@src/algorithms/nru/nruPage"
 import Page from "@src/page"
 
+import DuplicatePageError from "@src/errors/duplicatePageError"
+import PageNotFoundError from "@src/errors/pageNotFoundError"
+
 //* yarn test:watch ./tests/algorithms/nru/index.spec.ts
 
 describe('NRU algorithm expectations', () => {
@@ -27,62 +30,106 @@ describe('NRU algorithm expectations', () => {
       expect(nru.memory.length).toBe(0)
     })
   
-    it('should be able to add pages', () => {
-      const pageIds: string[] = []
-      for (let i = 0; i < memorySize; i++) {
-        pageIds.push(faker.string.alpha({
-          casing: "upper",
-          exclude: pageIds
-        }))
-      }
-  
-      pageIds.forEach(pageId => nru.addPageToMemory(new Page(pageId)))
-  
-      expect(nru.memory.length).toBe(memorySize)
-      expect(nru.memory.length).toBe(pageIds.length)
-      for (let i = 0; i < memorySize; i++) {
-        expect(nru.memory[i].id).toBe(pageIds[i])
-        expect(nru.memory[i].lastTimeUsed).toBe(i)
-        expect(nru.memory[i].modified).toBe(false)
-      }
-    })
-  
-    it('should be able to use a page', () => {
-      const memoryBeforeChanges = nru.memory.map(nruPage => new NRUPage(nruPage.id, nruPage.lastTimeUsed))
-  
-      const memoryPageIds = memoryBeforeChanges.map(page => page.id)
-  
-      const pageIndices: number[] = [0, 2, 3]
-      pageIndices.forEach(index => nru.usePage(memoryPageIds[index]))
-  
-      for (let i = 0; i < memorySize; i++) {
-        expect(nru.memory[i].id).toBe(memoryBeforeChanges[i].id)
-        expect(nru.memory[i].modified).toBe(memoryBeforeChanges[i].modified)
-        if (i === 1) {
-          expect(nru.memory[i].lastTimeUsed).toBe(memoryBeforeChanges[i].lastTimeUsed)
-          continue
+    describe('Add pages expectations', () => {
+      it('should be able to add pages', () => {
+        const pageIds: string[] = []
+        for (let i = 0; i < memorySize; i++) {
+          pageIds.push(faker.string.alpha({
+            casing: "upper",
+            exclude: pageIds
+          }))
         }
-        expect(nru.memory[i].lastTimeUsed).not.toBe(memoryBeforeChanges[i].lastTimeUsed)
-      }
+    
+        pageIds.forEach(pageId => nru.addPageToMemory(new Page(pageId)))
+    
+        expect(nru.memory.length).toBe(memorySize)
+        expect(nru.memory.length).toBe(pageIds.length)
+        for (let i = 0; i < memorySize; i++) {
+          expect(nru.memory[i].id).toBe(pageIds[i])
+          expect(nru.memory[i].lastTimeUsed).toBe(i)
+          expect(nru.memory[i].modified).toBe(false)
+        }
+      })
   
-      expect(nru.memory[0].lastTimeUsed).toBe(4)
-      expect(nru.memory[1].lastTimeUsed).toBe(1)
-      expect(nru.memory[2].lastTimeUsed).toBe(5)
-      expect(nru.memory[3].lastTimeUsed).toBe(6)
+      it('should not be able to add pages with identical id', () => {
+        const memoryBeforeChanges = nru.memory
+        const memoryPageIds = memoryBeforeChanges.map(page => page.id)
+  
+        const pages: NRUPage[] = memoryPageIds.map((id, index) => new NRUPage(id, index))
+  
+        pages.forEach(page => {
+          expect(() => nru.addPageToMemory(page)).toThrow(DuplicatePageError)
+        })
+        expect(nru.memory).toBe(memoryBeforeChanges)
+      })
     })
   
-    it('should be able to modify a page', () => {
-      const memoryBeforeChanges = nru.memory.map(nruPage => new NRUPage(nruPage.id, nruPage.lastTimeUsed))
+    describe('Use page expectations', () => {
+      it('should be able to use a page', () => {
+        const memoryBeforeChanges = nru.memory.map(nruPage => new NRUPage(nruPage.id, nruPage.lastTimeUsed))
+    
+        const memoryPageIds = memoryBeforeChanges.map(page => page.id)
+    
+        const pageIndices: number[] = [0, 2, 3]
+        pageIndices.forEach(index => nru.usePage(memoryPageIds[index]))
+    
+        for (let i = 0; i < memorySize; i++) {
+          expect(nru.memory[i].id).toBe(memoryBeforeChanges[i].id)
+          expect(nru.memory[i].modified).toBe(memoryBeforeChanges[i].modified)
+          if (i === 1) {
+            expect(nru.memory[i].lastTimeUsed).toBe(memoryBeforeChanges[i].lastTimeUsed)
+            continue
+          }
+          expect(nru.memory[i].lastTimeUsed).not.toBe(memoryBeforeChanges[i].lastTimeUsed)
+        }
+    
+        expect(nru.memory[0].lastTimeUsed).toBe(4)
+        expect(nru.memory[1].lastTimeUsed).toBe(1)
+        expect(nru.memory[2].lastTimeUsed).toBe(5)
+        expect(nru.memory[3].lastTimeUsed).toBe(6)
+      })
   
-      const memoryPageIds = memoryBeforeChanges.map(page => page.id)
+      it("should not be able to use a page that isn't in memory", () => {
+        const memoryBeforeChanges = nru.memory
+        const memoryPageIds: string[] = memoryBeforeChanges.map(page => page.id)
   
-      const pageIndices: number[] = [0, 2, 3]
-      pageIndices.forEach(index => nru.modifyPage(memoryPageIds[index]))
+        const pageId = faker.string.alpha({
+          casing: "upper",
+          exclude: memoryPageIds
+        })
   
-      expect(memoryBeforeChanges).not.toBe(nru.memory)
-      expect(nru.memory[1].modified).toBe(false)
-      pageIndices.forEach(index => {
-        expect(nru.memory[index].modified).toBe(true)
+        expect(() => nru.usePage(pageId)).toThrow(PageNotFoundError)
+        expect(nru.memory).toBe(memoryBeforeChanges)
+      })
+    })
+
+    describe('Modify page expectations', () => {
+      it('should be able to modify a page', () => {
+        const memoryBeforeChanges = nru.memory.map(nruPage => new NRUPage(nruPage.id, nruPage.lastTimeUsed))
+    
+        const memoryPageIds = memoryBeforeChanges.map(page => page.id)
+    
+        const pageIndices: number[] = [0, 2, 3]
+        pageIndices.forEach(index => nru.modifyPage(memoryPageIds[index]))
+    
+        expect(memoryBeforeChanges).not.toBe(nru.memory)
+        expect(nru.memory[1].modified).toBe(false)
+        pageIndices.forEach(index => {
+          expect(nru.memory[index].modified).toBe(true)
+        })
+      })
+  
+      it("should not be able to modify a page that isn't in memory", () => {
+        const memoryBeforeChanges = nru.memory
+        const memoryPageIds: string[] = memoryBeforeChanges.map(page => page.id)
+  
+        const pageId = faker.string.alpha({
+          casing: "upper",
+          exclude: memoryPageIds
+        })
+  
+        expect(() => nru.modifyPage(pageId)).toThrow(PageNotFoundError)
+        expect(nru.memory).toBe(memoryBeforeChanges)
       })
     })
   
